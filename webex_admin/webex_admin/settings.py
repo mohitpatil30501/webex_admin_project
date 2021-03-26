@@ -26,7 +26,7 @@ SECRET_KEY = '!06i*iwn9wx*24956skqtz6n%t!55myy_vph@54fyhib2u_-kp'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'ssbtmechtech.ga']
 
 # Application definition
 
