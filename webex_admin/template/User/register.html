@@ -1,0 +1,47 @@
+{% extends 'User/base.html' %}
+{% load static %}
+
+{% block title %}
+Signup
+{% endblock %}
+
+{% block head %}
+<script>
+    var token = '{% csrf_token %}';
+</script>
+<script type="text/javascript" src="{% static 'js/User/register.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+<body class="hold-transition register-page">
+<div class="register-box">
+  <div class="card card-outline card-primary">
+    <div class="card-header text-center">
+      <a href="/" class="h1"><b>SSBT</b></a>
+    </div>
+    <div class="card-body">
+      <p class="login-box-msg">Register a new membership</p>
+        <!-- tabs -->
+        <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="teacher-tab" data-toggle="tab" href="#teacher" role="tab" aria-controls="teacher" aria-selected="true">Teacher</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="teacher" role="tabpanel" aria-labelledby="teacher-tab">
+                <p class="text-danger text-center py-3" id="loading_signup-teacher">Wait for connecting to Server</p>
+            </div>
+        </div>
+
+
+
+      <hr>
+      <a href="/accounts/login" class="text-center">I already have a membership</a>
+    </div>
+    <!-- /.form-box -->
+  </div><!-- /.card -->
+</div>
+<!-- /.register-box -->
+
+</body>
+{% endblock %}

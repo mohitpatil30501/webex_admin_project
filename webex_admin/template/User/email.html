@@ -1,0 +1,21 @@
+{% extends 'User/base.html' %}
+{% load static %}
+
+{% block title %}
+SSBT | Email
+{% endblock %}
+
+{% block body %}
+<body class="container-fluid m-0 p-0 body-wrapper">
+	<!-- page -->
+    <div class="container righteous text-center" style="max-width: 600px;">
+        <h1 class="text-center p-5">Email Send Successfully</h1>
+    </div>
+    <div class="container montserrat border border-dark rounded p-3" style="max-width: 480px;">
+        <img src="{% static 'assets/image/User/email_send_success.gif' %}" width="100%" height="100%">
+        <p class="text-danger text-center montserrat-alt">Check Your registered Email to Verify You</p>
+        <br>
+        <p class="text-danger text-center montserrat-alt">Then LogIn Again</p>
+    </div>
+</body>
+{% endblock %}

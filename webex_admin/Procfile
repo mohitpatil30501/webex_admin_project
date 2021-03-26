@@ -1,0 +1,1 @@
+web: gunicorn webex_admin.wsgi

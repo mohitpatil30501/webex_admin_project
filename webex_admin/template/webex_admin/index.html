@@ -1,0 +1,62 @@
+{% extends 'webex_admin/base.html' %}
+{% load static %}
+
+{% block title %}
+SSBT
+{% endblock %}
+
+{% block head %}
+  <link href="{% static 'css/webex_admin/index.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<body class="text-center" style="background-image: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('{% static 'assets/background/webex_admin/index.webp' %}');background-repeat:no-repeat;background-attachment:fixed;background-size:cover;background-position:center">
+
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+      <header class="masthead mb-auto">
+        <div class="inner">
+          <h3 class="masthead-brand">SSBT</h3>
+          <nav class="nav nav-masthead justify-content-center">
+            <a class="nav-link active" href="/">Home</a>
+            {% if request.user.is_authenticated %}
+              <a class="nav-link" href="/dashboard">Dashboard</a>
+            {% else %}
+              <a class="nav-link" href="/accounts/login">Login</a>
+            {% endif %}
+            <a class="nav-link" href="#">About</a>
+          </nav>
+        </div>
+      </header>
+
+      <main role="main" class="inner cover">
+        <h1 class="cover-heading">SSBT's Webex Panel</h1>
+        <p class="lead">SSBT's College of Engineering and Technology</p>
+
+        {% if request.user.is_authenticated %}
+          <div class="lead">
+            <a href="/dashboard" class="btn btn-lg btn-secondary m-2 bg-primary text-light border border-primary">Dashboard</a>
+            <form method="post" action="/accounts/logout">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-lg btn-secondary m-2">LogOut</button>
+            </form>
+          </div>
+        {% else %}
+          <div class="lead">
+            <a href="/accounts/login" class="btn btn-lg btn-secondary m-2 bg-primary text-light border border-primary">Log In</a>
+            <a href="/accounts/signup" class="btn btn-lg btn-secondary m-2">Join Us</a>
+          </div>
+        {% endif %}
+      </main>
+
+      <footer class="mastfoot mt-auto">
+        <div class="inner">
+          <strong>Copyright © Mohit M. Patil.</strong>
+          All rights reserved.
+        <div class="float-right d-none d-sm-inline-block">
+          <b>Version</b> 0.0.1-Beta
+        </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+{% endblock %}
