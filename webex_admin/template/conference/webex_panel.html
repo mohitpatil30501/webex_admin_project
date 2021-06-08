@@ -173,6 +173,7 @@ Conference Room
                             <tr>
                               <th scope="col">Title</th>
                               <th scope="col">Meeting Number</th>
+                              <th scope="col">Admit</th>
                               <th scope="col">Attendance</th>
                               <th scope="col">Edit</th>
                               <th scope="col">Delete</th>
@@ -182,7 +183,8 @@ Conference Room
                           {% for team in data.teams %}
                             <tr id="{{team.meeting_id}}">
                               <td>{{team.title}}</td>
-                              <td>{{team.meeting_number}}</td>
+                              <td><div class="row"><div class="col-lg-9">{{team.meeting_number}}</div><div class="col-lg-3"><a href="{{team.meeting_url}}">Host</a></div></div></td>
+                              <td><a class="btn btn-success" href="/webex/team/admit/{{team.meeting_id}}">Admit</a></td>
                               <td><a class="btn btn-success" href="/webex/team/attendance/{{team.meeting_id}}">Download</a></td>
                               <td><a class="btn btn-primary" href="/webex/team/{{team.meeting_id}}/edit">Edit</a></td>
                               <td><button type="button" class="btn btn-danger" onclick="delete_team('{{team.meeting_id}}')">Delete</button></td>

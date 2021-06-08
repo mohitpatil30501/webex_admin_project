@@ -32,7 +32,7 @@ def webex_panel(request):
             teams.append({
                 'title': team.title,
                 'meeting_id': team.meeting_id,
-                'meeting_number': team.meeting_number
+                'meeting_number': team.meeting_number,
             })
 
         data = {
@@ -181,7 +181,6 @@ def team_create(request):
 
                     url = f"https://webexapis.com/v1/meetings?meetingNumber={response['meetingNumber']}"
                     response = requests.get(url, headers=headers).json()
-                    print(response)
                     team.meeting_id = response['items'][0]['id']
                     team.save()
                     message = "Team Created Successfully"
@@ -216,6 +215,8 @@ def team_attendance(request, meeting_id):
             return HttpResponse('<h1>400 Not Found Error</h1>')
         else:
             try:
+                team = ClassRoom.objects.filter(meeting_id=meeting_id).get()
+
                 token_data = AccessToken.objects.filter(user=request.user).get()
                 if datetime.datetime.now(datetime.timezone.utc) - token_data.last_modification >= datetime.timedelta(
                         days=10):
@@ -236,6 +237,10 @@ def team_attendance(request, meeting_id):
                     'Authorization': f'Bearer {token_data.token}',
                     'Content-Type': 'application/json'
                 }
+
+                url = f"https://webexapis.com/v1/teams/{team.cisco_id}"
+                response = requests.get(url, headers=headers).json()
+                title = response['name']
 
                 url = f"https://webexapis.com/v1/meetingParticipants?meetingId={meeting_id}"
                 response = requests.get(url, headers=headers).json()
@@ -258,9 +263,19 @@ def team_attendance(request, meeting_id):
             cell.value = "Email"
             cell.font = Font(bold=True)
 
+            cell = sheet.cell(row=1, column=4)
+            cell.value = "State"
+            cell.font = Font(bold=True)
+
+            cell = sheet.cell(row=1, column=5)
+            cell.value = "Joined Time"
+            cell.font = Font(bold=True)
+
             sheet.column_dimensions['A'].width = 10
             sheet.column_dimensions['B'].width = 40
             sheet.column_dimensions['C'].width = 50
+            sheet.column_dimensions['D'].width = 20
+            sheet.column_dimensions['E'].width = 40
 
             for row, attendee in enumerate(response, start=2):
                 cell = sheet.cell(row=row, column=1)
@@ -271,8 +286,16 @@ def team_attendance(request, meeting_id):
 
                 cell = sheet.cell(row=row, column=3)
                 cell.value = str(attendee['email'])
+
+                cell = sheet.cell(row=row, column=4)
+                cell.value = str(attendee['state'])
+
+                cell = sheet.cell(row=row, column=5)
+                epoch_time = int(attendee['devices'][0]['joinedTime'])
+                cell.value = str(datetime.datetime.fromtimestamp(epoch_time/1000))
+
             now = datetime.datetime.now()
-            filename = str(meeting_id) + '_D_' + str(now.strftime("%Y")) + '_' + str(now.strftime("%m")) + '_' + str(now.strftime("%d")) + '_T_' + str(now.strftime("%H:%M:%S")).replace(':', '-') + '.xlsx'
+            filename = str(title) + '_D_' + str(now.strftime("%Y")) + '_' + str(now.strftime("%m")) + '_' + str(now.strftime("%d")) + '_T_' + str(now.strftime("%H:%M:%S")).replace(':', '-') + "_Meet_" + str(meeting_id) + '.xlsx'
             filepath = os.path.join(BASE_DIR, str(r'../../attendance/' + filename))
             wb.save(filepath)
 
@@ -480,3 +503,58 @@ def team_member_add_list(request, meeting_id):
                     return HttpResponse('<h1>No Account Found</h1>')
         return redirect('/')
     return HttpResponse('<h1>404 Not Found</h1>')
+
+
+def team_admit(request, meeting_id):
+    if request.user.is_authenticated:
+        try:
+            team = ClassRoom.objects.filter(meeting_id=meeting_id).get()
+
+            token_data = AccessToken.objects.filter(user=request.user).get()
+            if datetime.datetime.now(datetime.timezone.utc) - token_data.last_modification >= datetime.timedelta(
+                    days=10):
+                headers = {'Content-Type': 'application/json'}
+                url = "https://api.ciscospark.com/v1/access_token"
+                body = {
+                    'grant_type': 'refresh_token',
+                    'client_id': CLIENT_ID,
+                    'client_secret': CLIENT_SECRET,
+                    'refresh_token': token_data.refresh_token
+                }
+                response = requests.post(url, headers=headers, data=json.dumps(body)).json()
+                token_data.token = response['token']
+                token_data.refresh_token = response['refresh_token']
+                token_data.save()
+
+            headers = {
+                'Authorization': f'Bearer {token_data.token}',
+                'Content-Type': 'application/json'
+            }
+
+            url = f"https://webexapis.com/v1/team/memberships?teamId={team.cisco_id}"
+            response = requests.get(url, headers=headers).json()
+            response = response['items']
+            members = []
+            for member in response:
+                members.append(member['personEmail'])
+
+            url = f"https://webexapis.com/v1/meetingParticipants?meetingId={meeting_id}"
+            response = requests.get(url, headers=headers).json()
+            participants_list = response['items']
+
+            for participant in participants_list:
+                if participant['email'] in members:
+                    if participant['state'] == 'lobby':
+                        url = f"https://webexapis.com/v1/meetingParticipants/{participant['id']}"
+                        body = {
+                            'admit': True
+                        }
+                        requests.put(url, headers=headers, data=json.dumps(body)).json()
+
+            return redirect('/webex')
+        except:
+            return render(request, "error/index.html",
+                          {'error': 'Something Went Wrong',
+                           'message': "Invalid Meeting ID"})
+    else:
+        return redirect('/')

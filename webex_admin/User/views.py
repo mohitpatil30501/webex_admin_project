@@ -354,8 +354,8 @@ def reset_password_post(request):
                 student = Teacher.objects.filter(id=id).get()
             if student is None:
                 return render(request, "error/index.html",
-                            {'error': 'Data Problem',
-                            'message': "Unable to Extract user data...!"})
+                              {'error': 'Data Problem',
+                               'message': "Unable to Extract user data...!"})
 
             if student.password_state and not request.user.is_authenticated:
                 return render(request, "User/login.html", {'message': 'Password is Already Reset or Unchanged'})
@@ -403,7 +403,8 @@ def oauth(request):
     }
     response = requests.post(url, headers=headers, data=json.dumps(body)).json()
 
-    token_data = AccessToken.objects.create(id=uuid.uuid4(), user=user, token=response['access_token'], refresh_token=response['refresh_token'])
+    token_data = AccessToken.objects.create(id=uuid.uuid4(), user=user, token=response['access_token'],
+                                            refresh_token=response['refresh_token'])
 
     if datetime.datetime.now(datetime.timezone.utc) - token_data.last_modification >= datetime.timedelta(
             days=10):
@@ -429,7 +430,7 @@ def oauth(request):
     response = requests.get(url, headers=headers).json()
 
     cisco_id = response['items'][0]['id']
-    TeacherData.objects.create(name=str(user.first_name + ' ' + user.last_name), cisco_id=cisco_id)
+    TeacherData.objects.create(id=uuid.uuid4(), name=str(user.first_name + ' ' + user.last_name), cisco_id=cisco_id)
 
     return render(request, "User/email.html", {'status': True,
                                                'email_status': True,
